@@ -1,0 +1,1794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Low-Enthalpy Waste Heat Recovery: Strategic Assessment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .chart-container { 
+            position: relative; 
+            width: 100%; 
+            max-width: 600px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 350px; 
+            max-height: 400px; 
+        }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .transition-all-300 { transition: all 0.3s ease-in-out; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Block Diagram Styles */
+        .process-arrow::after {
+            content: '→';
+            font-size: 24px;
+            color: #94a3b8;
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .last-item .process-arrow::after { display: none; }
+
+        /* Tech Cycle Diagram Styles (CSS Flowcharts) */
+        .cycle-container {
+            display: grid;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: #f1f5f9;
+            border-radius: 0.75rem;
+            justify-items: center;
+            align-items: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #475569;
+        }
+        .cycle-box {
+            background: white;
+            border: 2px solid #cbd5e1;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            width: 120px;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .cycle-box.heat-source { border-color: #ef4444; color: #ef4444; background: #fef2f2; }
+        .cycle-box.heat-sink { border-color: #3b82f6; color: #3b82f6; background: #eff6ff; }
+        .cycle-box.work { border-color: #22c55e; color: #22c55e; background: #f0fdf4; border-style: dashed; }
+        
+        /* Connectors */
+        .connector-down { width: 2px; height: 20px; background: #94a3b8; }
+        .connector-right { height: 2px; width: 20px; background: #94a3b8; }
+        
+        /* Modal Animation */
+        #techModal { transition: opacity 0.3s ease; }
+        #techModal.hidden { pointer-events: none; opacity: 0; }
+        #techModal:not(.hidden) { pointer-events: auto; opacity: 1; }
+
+        /* Tabs Styles */
+        .tab-btn.active { border-bottom: 2px solid #2563eb; color: #2563eb; font-weight: 600; background-color: #f8fafc; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .mat-tab-btn.active { border-bottom: 2px solid #2563eb; color: #2563eb; font-weight: 600; }
+        .mat-tab-content { display: none; }
+        .mat-tab-content.active { display: block; animation: fadeIn 0.3s ease-in; }
+        
+        .case-tab-btn.active { border-bottom: 2px solid #2563eb; color: #2563eb; font-weight: 600; background-color: #f8fafc; }
+        .case-tab-content { display: none; }
+        .case-tab-content.active { display: block; animation: fadeIn 0.3s ease-in; }
+        
+        /* Tech Tabs */
+        .tech-tab-btn.active { 
+            border-bottom: 2px solid #2563eb; 
+            color: #2563eb; 
+            font-weight: 600;
+        }
+        .tech-tab-content { display: none; }
+        .tech-tab-content.active { display: block; animation: fadeIn 0.3s ease-in; }
+
+         /* Startup Tabs */
+        .startup-tab-btn.active { 
+            border-bottom: 2px solid #2563eb; 
+            color: #2563eb; 
+            font-weight: 600;
+        }
+        .startup-tab-content { display: none; }
+        .startup-tab-content.active { display: block; animation: fadeIn 0.3s ease-in; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center gap-2">
+                        <span class="text-2xl">🔥</span>
+                        <span class="font-bold text-xl tracking-tight text-slate-900">EnergyRecovery<span class="text-blue-600">Strategy</span></span>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-4">
+                        <a href="#executive-summary" class="border-transparent text-slate-500 hover:border-blue-500 hover:text-slate-700 inline-flex items-center px-1 pt-1 border-b-2 text-xs font-medium uppercase tracking-wide">Summary</a>
+                        <a href="#introduction" class="border-transparent text-slate-500 hover:border-blue-500 hover:text-slate-700 inline-flex items-center px-1 pt-1 border-b-2 text-xs font-medium uppercase tracking-wide">Intro</a>
+                        <a href="#strategic-fit" class="border-transparent text-slate-500 hover:border-blue-500 hover:text-slate-700 inline-flex items-center px-1 pt-1 border-b-2 text-xs font-medium uppercase tracking-wide">Strategy</a>
+                        <a href="#technology-landscape" class="border-transparent text-slate-500 hover:border-blue-500 hover:text-slate-700 inline-flex items-center px-1 pt-1 border-b-2 text-xs font-medium uppercase tracking-wide">Tech</a>
+                        <a href="#critical-materials" class="border-transparent text-slate-500 hover:border-blue-500 hover:text-slate-700 inline-flex items-center px-1 pt-1 border-b-2 text-xs font-medium uppercase tracking-wide">Materials</a>
+                        <a href="#case-studies" class="border-transparent text-slate-500 hover:border-blue-500 hover:text-slate-700 inline-flex items-center px-1 pt-1 border-b-2 text-xs font-medium uppercase tracking-wide">Cases</a>
+                        <a href="#startup-spotlight" class="border-transparent text-slate-500 hover:border-blue-500 hover:text-slate-700 inline-flex items-center px-1 pt-1 border-b-2 text-xs font-medium uppercase tracking-wide">Startups</a>
+                        <a href="#feasibility" class="border-transparent text-slate-500 hover:border-blue-500 hover:text-slate-700 inline-flex items-center px-1 pt-1 border-b-2 text-xs font-medium uppercase tracking-wide">Calculator</a>
+                        <a href="#conclusion" class="border-transparent text-slate-500 hover:border-blue-500 hover:text-slate-700 inline-flex items-center px-1 pt-1 border-b-2 text-xs font-medium uppercase tracking-wide">Conclusion</a>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">For: Devon, Williams, OneOK</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Tech Detail Modal -->
+    <div id="techModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 hidden backdrop-blur-sm p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col md:flex-row relative">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 z-10 bg-white rounded-full p-1">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <div class="p-8 md:w-1/2 border-r border-slate-100">
+                <div id="modal-tags" class="flex gap-2 mb-4"></div>
+                <h3 id="modal-title" class="text-2xl font-bold text-slate-900 mb-4"></h3>
+                <p id="modal-desc" class="text-slate-600 mb-6 text-sm leading-relaxed"></p>
+                <div class="bg-slate-50 rounded-lg p-4 mb-6">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Key Performance Indicators</h4>
+                    <ul class="space-y-3 text-sm" id="modal-stats"></ul>
+                </div>
+                <div class="border-t border-slate-100 pt-4">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Ideal Application</h4>
+                    <p id="modal-app" class="text-sm text-slate-700 italic"></p>
+                </div>
+            </div>
+            <div class="p-8 md:w-1/2 bg-slate-50 flex flex-col items-center justify-center">
+                <h4 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-6">Process Cycle Diagram</h4>
+                <div id="modal-diagram" class="w-full"></div>
+                <p class="text-xs text-center text-slate-400 mt-6 max-w-xs mx-auto">Schematic representation of the thermodynamic cycle.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero / Executive Summary -->
+    <section id="executive-summary" class="py-12 bg-white border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:grid lg:grid-cols-2 lg:gap-16 items-center">
+                <div>
+                    <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight sm:text-5xl mb-6">
+                        Turning Waste Heat into <span class="text-blue-600">Asset Value</span>
+                    </h1>
+                    <p class="mt-4 text-lg text-slate-600 leading-relaxed">
+                        The Oil & Gas industry currently loses <span class="font-bold text-red-500">20-50%</span> of energy input as waste heat. 
+                        For operators like Devon Energy, Williams, and OneOK, capturing this thermal energy via technologies like ORC or Absorption Chillers reduces Scope 2 emissions and lowers OpEx.
+                    </p>
+                    <div class="mt-8 flex gap-4">
+                        <div class="flex flex-col bg-slate-50 p-4 rounded-lg border border-slate-200 w-1/3 text-center transition-all-300 card-hover">
+                            <span class="text-3xl font-bold text-blue-600">20-50%</span>
+                            <span class="text-xs font-semibold uppercase text-slate-500 mt-1">Energy Input Lost</span>
+                        </div>
+                        <div class="flex flex-col bg-slate-50 p-4 rounded-lg border border-slate-200 w-1/3 text-center transition-all-300 card-hover">
+                            <span class="text-3xl font-bold text-emerald-600">&lt;5 Yrs</span>
+                            <span class="text-xs font-semibold uppercase text-slate-500 mt-1">ROI (w/ Incentives)</span>
+                        </div>
+                        <div class="flex flex-col bg-slate-50 p-4 rounded-lg border border-slate-200 w-1/3 text-center transition-all-300 card-hover">
+                            <span class="text-3xl font-bold text-purple-600">ESG</span>
+                            <span class="text-xs font-semibold uppercase text-slate-500 mt-1">Scope 2 Reduction</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-10 lg:mt-0 flex flex-col items-center">
+                    <div class="text-center mb-4">
+                        <h3 class="text-lg font-medium text-slate-900">The Efficiency Gap</h3>
+                        <p class="text-sm text-slate-500">Current Energy Utilization vs. Loss</p>
+                    </div>
+                    <div class="chart-container" style="height: 300px; width: 300px;">
+                        <canvas id="wasteChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Introduction (Heat Types & Sources) -->
+    <section id="introduction" class="py-16 bg-slate-50 border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <h2 class="text-3xl font-bold text-slate-900">Understanding Low-Enthalpy Heat</h2>
+                <p class="mt-4 text-slate-600">
+                    Low-enthalpy heat has high entropy and consequently low exergy—meaning the capacity to perform useful work is fundamentally limited by thermodynamics, even when total energy is substantial.
+                </p>
+                <!-- Exergy Explanation -->
+                <div class="mt-8 bg-blue-50 p-6 rounded-lg border border-blue-100 text-left relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10">
+                        <svg class="w-32 h-32 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-blue-900 mb-3 flex items-center relative z-10">
+                        <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        What is Exergy? (Quality vs. Quantity)
+                    </h3>
+                    <p class="text-sm text-slate-700 leading-relaxed relative z-10">
+                        Consider this: A massive swimming pool at 30°C contains far more total energy (enthalpy) than a small cup of boiling water at 100°C due to its sheer mass. However, you can't efficiently use the pool water to cook an egg or spin a turbine. 
+                        The boiling water has higher <strong>Exergy</strong> because its temperature is significantly higher than the surroundings. Exergy measures the <em>useful</em> work potential created by this temperature difference. 
+                        In waste heat recovery, we hunt for Exergy—the ability to do work—rather than just total heat content.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-12 mt-12">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-6 flex items-center">
+                        <span class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-3 text-sm">1</span>
+                        Heat Classification
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="bg-white p-5 rounded-lg border-l-4 border-red-500 shadow-sm hover:shadow-md transition-shadow">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold text-slate-900">High Grade</h4>
+                                    <p class="text-xs text-slate-500 uppercase tracking-wide mt-1">Temperature: &gt;400°C</p>
+                                </div>
+                                <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded">Furnace Exhausts</span>
+                            </div>
+                            <p class="text-sm text-slate-600 mt-3">
+                                <span class="font-semibold">Recovery:</span> Conventional steam cycles.
+                            </p>
+                        </div>
+                        <div class="bg-white p-5 rounded-lg border-l-4 border-orange-500 shadow-sm hover:shadow-md transition-shadow">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold text-slate-900">Medium Grade</h4>
+                                    <p class="text-xs text-slate-500 uppercase tracking-wide mt-1">Temperature: 150–400°C</p>
+                                </div>
+                                <span class="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded">Turbine Exhaust</span>
+                            </div>
+                            <p class="text-sm text-slate-600 mt-3">
+                                <span class="font-semibold">Recovery:</span> ORC, Kalina Cycle.
+                            </p>
+                        </div>
+                        <div class="bg-white p-5 rounded-lg border-l-4 border-yellow-500 shadow-sm hover:shadow-md transition-shadow">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold text-slate-900">Low Grade</h4>
+                                    <p class="text-xs text-slate-500 uppercase tracking-wide mt-1">Temperature: &lt;150°C</p>
+                                </div>
+                                <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">Jacket Water</span>
+                            </div>
+                            <p class="text-sm text-slate-600 mt-3">
+                                <span class="font-semibold">Recovery:</span> Low-temp ORC, Absorption Chillers.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-6 flex items-center">
+                        <span class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-3 text-sm">2</span>
+                        Source Mapping by Sector
+                    </h3>
+                    
+                    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                        <div class="p-5 border-b border-slate-100 bg-slate-50">
+                            <h4 class="font-bold text-slate-900 mb-1">Upstream (Devon Energy)</h4>
+                            <p class="text-xs text-slate-500">Well pads and remote engines</p>
+                        </div>
+                        <div class="p-5 grid grid-cols-2 gap-4">
+                            <div class="text-center p-3 bg-white border border-slate-100 rounded">
+                                [Image of engine exhaust system]
+                                <div class="text-2xl font-bold text-orange-600">480-600°C</div>
+                                <div class="text-xs font-medium text-slate-500 mt-1">Engine Exhaust</div>
+                                <div class="text-[10px] text-slate-400 mt-1">100s kW/engine</div>
+                            </div>
+                            <div class="text-center p-3 bg-white border border-slate-100 rounded">
+                                <div class="text-2xl font-bold text-yellow-600">85-99°C</div>
+                                <div class="text-xs font-medium text-slate-500 mt-1">Engine Jacket Water</div>
+                                <div class="text-[10px] text-slate-400 mt-1">100s kW/engine</div>
+                            </div>
+                        </div>
+
+                        <div class="p-5 border-t border-b border-slate-100 bg-slate-50 mt-2">
+                            <h4 class="font-bold text-slate-900 mb-1">Midstream (Williams, OneOK)</h4>
+                            <p class="text-xs text-slate-500">Compressor stations and gas processing</p>
+                        </div>
+                        <div class="p-5 grid grid-cols-2 gap-4">
+                            <div class="text-center p-3 bg-white border border-slate-100 rounded">
+                                [Image of gas turbine exhaust]
+                                <div class="text-2xl font-bold text-orange-600">480-600°C</div>
+                                <div class="text-xs font-medium text-slate-500 mt-1">Gas Turbine Exhaust</div>
+                                <div class="text-[10px] text-slate-400 mt-1">10s MW/turbine</div>
+                            </div>
+                            <div class="text-center p-3 bg-white border border-slate-100 rounded">
+                                <div class="text-2xl font-bold text-yellow-600">100-180°C</div>
+                                <div class="text-xs font-medium text-slate-500 mt-1">Compressor Aftercooler</div>
+                                <div class="text-[10px] text-slate-400 mt-1">MW Scale</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Thermodynamic Cycles Subsection -->
+            <div class="mt-16">
+                <h3 class="text-2xl font-bold text-slate-900 mb-6 text-center">Thermodynamic Cycles in Waste Heat Recovery</h3>
+                <p class="text-center text-slate-600 mb-8 max-w-2xl mx-auto">
+                    The efficiency of converting waste heat into power depends heavily on the thermodynamic cycle employed. Different cycles are optimized for different temperature ranges and applications.
+                </p>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Rankine Cycle (ORC) -->
+                    <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                        <h4 class="font-bold text-slate-900 mb-2">Organic Rankine Cycle (ORC)</h4>
+                        <div class="h-32 bg-slate-100 rounded mb-4 flex items-center justify-center text-xs text-slate-400">
+                            [Image of Rankine cycle T-s diagram]
+                        </div>
+                        <ul class="text-xs text-slate-600 space-y-1 mb-4">
+                            <li><strong>Type:</strong> Vapor power cycle</li>
+                            <li><strong>Temp Range:</strong> 80-350°C</li>
+                            <li><strong>Efficiency:</strong> 10-25%</li>
+                            <li><strong>Key Feature:</strong> Uses organic fluid with lower boiling point than water.</li>
+                        </ul>
+                        <div class="text-xs font-semibold text-blue-600">Key Players: Turboden, Ormat, Climeon</div>
+                    </div>
+
+                    <!-- Kalina Cycle -->
+                    <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                        <h4 class="font-bold text-slate-900 mb-2">Kalina Cycle</h4>
+                        <div class="h-32 bg-slate-100 rounded mb-4 flex items-center justify-center text-xs text-slate-400">
+                             [Image of Kalina cycle schematic]
+                        </div>
+                        <ul class="text-xs text-slate-600 space-y-1 mb-4">
+                            <li><strong>Type:</strong> Variable composition cycle</li>
+                            <li><strong>Temp Range:</strong> 100-400°C</li>
+                            <li><strong>Efficiency:</strong> 12-30% (Higher than ORC)</li>
+                            <li><strong>Key Feature:</strong> Ammonia-water mixture allows variable boiling temp (glide).</li>
+                        </ul>
+                        <div class="text-xs font-semibold text-orange-600">Key Players: Kalina Power Ltd.</div>
+                    </div>
+
+                    <!-- Stirling Cycle -->
+                    <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                        <h4 class="font-bold text-slate-900 mb-2">Stirling Cycle</h4>
+                        <div class="h-32 bg-slate-100 rounded mb-4 flex items-center justify-center text-xs text-slate-400">
+                             [Image of Stirling cycle P-V diagram]
+                        </div>
+                        <ul class="text-xs text-slate-600 space-y-1 mb-4">
+                            <li><strong>Type:</strong> Closed-cycle regenerative</li>
+                            <li><strong>Temp Range:</strong> Wide range</li>
+                            <li><strong>Efficiency:</strong> High theoretical (approaches Carnot)</li>
+                            <li><strong>Key Feature:</strong> External combustion/heat source, quiet operation.</li>
+                        </ul>
+                        <div class="text-xs font-semibold text-green-600">Key Players: Qnergy (Remote Power)</div>
+                    </div>
+                    
+                     <!-- Brayton Cycle (sCO2) -->
+                    <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                        <h4 class="font-bold text-slate-900 mb-2">Supercritical CO2 Brayton</h4>
+                        <div class="h-32 bg-slate-100 rounded mb-4 flex items-center justify-center text-xs text-slate-400">
+                             [Image of Brayton cycle T-s diagram]
+                        </div>
+                        <ul class="text-xs text-slate-600 space-y-1 mb-4">
+                            <li><strong>Type:</strong> Gas power cycle (Supercritical)</li>
+                            <li><strong>Temp Range:</strong> >400°C (High Grade)</li>
+                            <li><strong>Efficiency:</strong> >40%</li>
+                            <li><strong>Key Feature:</strong> Compact turbomachinery due to high fluid density.</li>
+                        </ul>
+                        <div class="text-xs font-semibold text-purple-600">Key Players: Echogen Power Systems</div>
+                    </div>
+
+                     <!-- Carnot (Theoretical) -->
+                    <div class="bg-slate-50 p-6 rounded-lg border border-dashed border-slate-300 flex flex-col justify-center">
+                        <h4 class="font-bold text-slate-500 mb-2">Carnot Cycle (Theoretical Max)</h4>
+                        <p class="text-xs text-slate-400 mb-4">
+                            The theoretical upper limit of efficiency for any heat engine. No real engine can achieve this due to friction and irreversible processes.
+                        </p>
+                        <div class="text-center text-xl font-bold text-slate-300">
+                            η = 1 - (Tc / Th)
+                        </div>
+                         <p class="text-[10px] text-center text-slate-400 mt-2">
+                            (Efficiency depends purely on Temp Difference)
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Strategic Fit Section -->
+    <section id="strategic-fit" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <h2 class="text-3xl font-bold text-slate-900">Strategic Recommendations</h2>
+                <p class="mt-4 text-slate-600">
+                    Tailored approaches for Upstream and Midstream operations. Select your operational profile below.
+                </p>
+            </div>
+
+            <!-- Toggle Controls -->
+            <div class="flex justify-center mb-10">
+                <div class="bg-white p-1 rounded-lg border border-slate-200 shadow-sm inline-flex">
+                    <button onclick="switchStrategy('midstream')" id="btn-midstream" class="px-6 py-2 rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow-sm">
+                        Midstream (Williams, OneOK)
+                    </button>
+                    <button onclick="switchStrategy('upstream')" id="btn-upstream" class="ml-1 px-6 py-2 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                        Upstream (Devon)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dynamic Content Area -->
+            <div id="strategy-content" class="bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden transition-all-300">
+                <div class="grid md:grid-cols-2">
+                    <div class="p-8 lg:p-12 flex flex-col justify-center">
+                        <div class="uppercase tracking-wide text-sm text-blue-600 font-semibold mb-2" id="strategy-sector">Midstream Sector</div>
+                        <h3 class="text-2xl font-bold text-slate-900 mb-4" id="strategy-title">Compressor Station Optimization</h3>
+                        <p class="text-slate-600 mb-6 leading-relaxed" id="strategy-desc">
+                            Deploy 1-10 MW Organic Rankine Cycle (ORC) systems at gas turbine compressor stations. This captures high-volume exhaust heat to generate baseload electricity.
+                        </p>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-green-100 text-green-600 mt-1">✓</div>
+                                <div class="ml-4">
+                                    <h4 class="text-sm font-medium text-slate-900" id="tactic-1-title">Primary Application</h4>
+                                    <p class="text-sm text-slate-500" id="tactic-1-desc">1-10 MW ORC Systems at compressor stations.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 mt-1">⚡</div>
+                                <div class="ml-4">
+                                    <h4 class="text-sm font-medium text-slate-900" id="tactic-2-title">Secondary Application</h4>
+                                    <p class="text-sm text-slate-500" id="tactic-2-desc">Absorption Chillers for turbine inlet cooling.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Simplified Block Diagram -->
+                    <div class="bg-slate-100 p-8 lg:p-12 flex items-center justify-center border-l border-slate-200">
+                        <div class="w-full max-w-md">
+                            <h4 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-6 text-center">Process Integration Model</h4>
+                            <div class="flex flex-col space-y-4 relative" id="flow-diagram">
+                                <div class="flex items-center justify-between relative process-arrow pb-6">
+                                    <div class="bg-white border border-slate-300 shadow-sm p-4 rounded w-full text-center z-10">
+                                        <span class="block text-xs font-bold text-slate-400 uppercase">Source</span>
+                                        <span class="block text-lg font-bold text-slate-800" id="flow-1">Gas Turbine</span>
+                                        <span class="block text-xs text-slate-500">Exhaust Heat</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between relative process-arrow pb-6">
+                                    <div class="bg-blue-50 border border-blue-200 shadow-sm p-4 rounded w-full text-center z-10">
+                                        <span class="block text-xs font-bold text-blue-400 uppercase">Recovery Unit</span>
+                                        <span class="block text-lg font-bold text-blue-800" id="flow-2">ORC System</span>
+                                        <span class="block text-xs text-blue-500">Heat Exchanger</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between relative last-item">
+                                    <div class="bg-green-50 border border-green-200 shadow-sm p-4 rounded w-full text-center z-10">
+                                        <span class="block text-xs font-bold text-green-400 uppercase">Output</span>
+                                        <span class="block text-lg font-bold text-green-800" id="flow-3">Clean Power</span>
+                                        <span class="block text-xs text-green-500">Offset Grid Usage</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hybrid Solar-Fuel Steam EOR Recommendation -->
+            <div class="mt-8 bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden">
+                <div class="grid md:grid-cols-2">
+                    <div class="p-8 lg:p-12 flex flex-col justify-center">
+                        <div class="uppercase tracking-wide text-sm text-yellow-600 font-semibold mb-2">Upstream (Devon)</div>
+                        <h3 class="text-2xl font-bold text-slate-900 mb-4">Hybrid Solar-Fuel EOR Steam Generation</h3>
+                        <p class="text-slate-600 mb-6 leading-relaxed">
+                            For thermal EOR operations, integrate solar steam generation with traditional boilers or cogeneration. This hybrid approach uses solar energy during the day to generate steam, significantly reducing fuel consumption. Fuel-based systems provide the necessary baseload and night-time steam to maintain reservoir pressure and ensure well integrity.
+                        </p>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-yellow-100 text-yellow-600 mt-1">☀️</div>
+                                <div class="ml-4">
+                                    <h4 class="text-sm font-medium text-slate-900">Daytime Operations</h4>
+                                    <p class="text-sm text-slate-500">Solar steam generation reduces fuel dependency and operational costs. Solar steam LCOE is ~$17/ton, highly competitive against fuel-based steam at higher gas prices.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 mt-1">🌙</div>
+                                <div class="ml-4">
+                                    <h4 class="text-sm font-medium text-slate-900">Night-time & Baseload</h4>
+                                    <p class="text-sm text-slate-500">Traditional boilers or cogeneration ensure continuous steam injection, critical for safety (H2S backflow prevention) and well casing protection.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Simplified Block Diagram -->
+                    <div class="bg-slate-50 p-8 lg:p-12 flex items-center justify-center border-l border-slate-200">
+                        <div class="w-full max-w-md">
+                            <h4 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-6 text-center">Hybrid System Configuration</h4>
+                            <div class="flex flex-col space-y-4 relative">
+                                <div class="flex items-center justify-between relative pb-6">
+                                    <div class="bg-white border border-slate-300 shadow-sm p-4 rounded w-full text-center z-10">
+                                        <span class="block text-xs font-bold text-yellow-500 uppercase">Daytime</span>
+                                        <span class="block text-lg font-bold text-slate-800">Solar Field</span>
+                                        <span class="block text-xs text-slate-500">Steam Generation</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-center relative pb-6">
+                                    <div class="text-2xl text-slate-400 font-bold">+</div>
+                                </div>
+                                <div class="flex items-center justify-between relative pb-6">
+                                    <div class="bg-white border border-slate-300 shadow-sm p-4 rounded w-full text-center z-10">
+                                        <span class="block text-xs font-bold text-slate-500 uppercase">24/7 Base</span>
+                                        <span class="block text-lg font-bold text-slate-800">Fuel Boiler/Cogen</span>
+                                        <span class="block text-xs text-slate-500">Steam Generation</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between relative">
+                                    <div class="bg-green-50 border border-green-200 shadow-sm p-4 rounded w-full text-center z-10">
+                                        <span class="block text-xs font-bold text-green-400 uppercase">Target</span>
+                                        <span class="block text-lg font-bold text-green-800">Continuous Steam</span>
+                                        <span class="block text-xs text-green-500">Reduced OpEx & Carbon</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technology Landscape -->
+    <section id="technology-landscape" class="py-16 bg-slate-50 border-t border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-12">
+                <h2 class="text-3xl font-bold text-slate-900">The Technology Toolkit</h2>
+                <p class="mt-4 text-slate-600 max-w-3xl">
+                    Detailed analysis of the four primary technologies available. 
+                    <span class="font-bold text-blue-600">Click on any card</span> below to view the thermodynamic cycle and detailed specifications.
+                </p>
+                <div class="flex space-x-2 mt-6">
+                     <button onclick="openTechTab(event, 'tech-core')" class="tech-tab-btn active px-4 py-2 text-sm font-medium rounded-md hover:bg-slate-200 transition-colors">Core Technologies</button>
+                     <button onclick="openTechTab(event, 'tech-emerging')" class="tech-tab-btn px-4 py-2 text-sm font-medium rounded-md hover:bg-slate-200 transition-colors">Emerging Tech</button>
+                </div>
+            </div>
+
+            <!-- Core Technologies Tab -->
+            <div id="tech-core" class="tech-tab-content active grid lg:grid-cols-3 gap-8">
+                <!-- Chart Area -->
+                <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-6">
+                    <h3 class="text-lg font-semibold text-slate-900 mb-4">Efficiency vs. Complexity Matrix</h3>
+                    <div class="chart-container">
+                        <canvas id="techMatrixChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-xs text-slate-500 flex justify-between">
+                        <span>Low Complexity ←</span>
+                        <span>High Complexity →</span>
+                    </div>
+                </div>
+
+                <!-- Info Cards Area -->
+                <div class="space-y-4">
+                    <div class="group bg-white border border-slate-200 p-5 rounded-lg hover:border-blue-500 hover:bg-blue-50 cursor-pointer transition-all-300 shadow-sm relative" onclick="openModal('orc')">
+                        <div class="absolute top-5 right-5 text-slate-300 group-hover:text-blue-500">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-bold text-slate-900">Organic Rankine Cycle (ORC)</h4>
+                        </div>
+                        <p class="text-sm text-slate-600 line-clamp-2">The industry workhorse. Uses organic fluids to generate power from low-temp heat.</p>
+                        <div class="mt-3 flex gap-2 text-xs font-medium text-slate-500">
+                            <span class="bg-slate-100 px-2 py-1 rounded">≥85°C</span>
+                            <span class="bg-slate-100 px-2 py-1 rounded">Power Gen</span>
+                        </div>
+                    </div>
+
+                    <div class="group bg-white border border-slate-200 p-5 rounded-lg hover:border-orange-500 hover:bg-orange-50 cursor-pointer transition-all-300 shadow-sm relative" onclick="openModal('kalina')">
+                        <div class="absolute top-5 right-5 text-slate-300 group-hover:text-orange-500">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-bold text-slate-900">Kalina Cycle</h4>
+                        </div>
+                        <p class="text-sm text-slate-600 line-clamp-2">Higher theoretical efficiency (12-30%) using ammonia-water mixture, but higher complexity.</p>
+                        <div class="mt-3 flex gap-2 text-xs font-medium text-slate-500">
+                            <span class="bg-slate-100 px-2 py-1 rounded">Variable Temp</span>
+                            <span class="bg-slate-100 px-2 py-1 rounded">High Eff</span>
+                        </div>
+                    </div>
+
+                    <div class="group bg-white border border-slate-200 p-5 rounded-lg hover:border-green-500 hover:bg-green-50 cursor-pointer transition-all-300 shadow-sm relative" onclick="openModal('teg')">
+                        <div class="absolute top-5 right-5 text-slate-300 group-hover:text-green-500">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-bold text-slate-900">Thermoelectric (TEG)</h4>
+                        </div>
+                        <p class="text-sm text-slate-600 line-clamp-2">Solid state, no moving parts. Ideal for remote, low-power reliability (SCADA).</p>
+                        <div class="mt-3 flex gap-2 text-xs font-medium text-slate-500">
+                            <span class="bg-slate-100 px-2 py-1 rounded">Any Temp</span>
+                            <span class="bg-slate-100 px-2 py-1 rounded">Remote Power</span>
+                        </div>
+                    </div>
+
+                    <div class="group bg-white border border-slate-200 p-5 rounded-lg hover:border-purple-500 hover:bg-purple-50 cursor-pointer transition-all-300 shadow-sm relative" onclick="openModal('abs')">
+                        <div class="absolute top-5 right-5 text-slate-300 group-hover:text-purple-500">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-bold text-slate-900">Absorption Chillers</h4>
+                        </div>
+                        <p class="text-sm text-slate-600 line-clamp-2">Converts heat to cooling (COP 0.7-1.4). Enables turbine inlet cooling.</p>
+                        <div class="mt-3 flex gap-2 text-xs font-medium text-slate-500">
+                            <span class="bg-slate-100 px-2 py-1 rounded">≥90°C</span>
+                            <span class="bg-slate-100 px-2 py-1 rounded">Cooling</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Emerging Technologies Tab -->
+            <div id="tech-emerging" class="tech-tab-content grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- TMC Card -->
+                <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                    <h4 class="font-bold text-slate-900 mb-2">Transport Membrane Condenser (TMC)</h4>
+                    <div class="h-32 bg-slate-100 rounded mb-4 flex items-center justify-center text-xs text-slate-400">
+                        
+                    </div>
+                    <ul class="text-xs text-slate-600 space-y-1 mb-4">
+                        <li><strong>Feature:</strong> Recovers latent heat & water from flue gas.</li>
+                        <li><strong>Mechanism:</strong> Capillary condensation via membrane.</li>
+                        <li><strong>Application:</strong> Boiler feedwater preheating.</li>
+                    </ul>
+                </div>
+
+                <!-- Thermionic Card -->
+                <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                    <h4 class="font-bold text-slate-900 mb-2">Thermionic Generation</h4>
+                    
+                    <ul class="text-xs text-slate-600 space-y-1 mb-4 mt-4">
+                        <li><strong>Feature:</strong> Direct heat-to-electricity conversion.</li>
+                        <li><strong>Mechanism:</strong> Electron emission across vacuum gap.</li>
+                        <li><strong>Temp Range:</strong> High (>1000°C), typically.</li>
+                    </ul>
+                </div>
+
+                <!-- Piezoelectric Card -->
+                <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                    <h4 class="font-bold text-slate-900 mb-2">Piezoelectric Generation</h4>
+                    [Image of Piezoelectric energy harvesting diagram]
+                    <ul class="text-xs text-slate-600 space-y-1 mb-4 mt-4">
+                        <li><strong>Feature:</strong> Converts mechanical strain from heat expansion.</li>
+                        <li><strong>Mechanism:</strong> Oscillatory gas expansion.</li>
+                        <li><strong>Efficiency:</strong> Currently low (~1%), R&D phase.</li>
+                    </ul>
+                </div>
+
+                <!-- TPV Card -->
+                <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                    <h4 class="font-bold text-slate-900 mb-2">Thermo-Photovoltaic (TPV)</h4>
+                     [Image of Thermophotovoltaic cell diagram]
+                    <ul class="text-xs text-slate-600 space-y-1 mb-4 mt-4">
+                        <li><strong>Feature:</strong> Converts infrared radiation to electricity.</li>
+                        <li><strong>Mechanism:</strong> PV cells tuned to heat source spectrum.</li>
+                        <li><strong>Potential:</strong> High efficiency for high-temp industrial waste heat.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Critical Materials -->
+    <section id="critical-materials" class="py-16 bg-white border-t border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-10 text-center">
+                <h2 class="text-3xl font-bold text-slate-900">Critical Materials & Reliability</h2>
+                <p class="mt-4 text-slate-600 max-w-2xl mx-auto">
+                    Material selection drives 25.5% of ORC system costs—far exceeding the impact of working fluid selection. Long-term reliability depends on matching materials to fluids and operating conditions.
+                </p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+                <div class="flex border-b border-slate-200 bg-slate-50">
+                    <button onclick="openTab(event, 'mat-orc', 'mat-tab-btn', 'mat-tab-content')" class="mat-tab-btn active w-1/4 py-4 text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">ORC Systems</button>
+                    <button onclick="openTab(event, 'mat-kalina', 'mat-tab-btn', 'mat-tab-content')" class="mat-tab-btn w-1/4 py-4 text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">Kalina Cycle</button>
+                    <button onclick="openTab(event, 'mat-abs', 'mat-tab-btn', 'mat-tab-content')" class="mat-tab-btn w-1/4 py-4 text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">Absorption Chillers</button>
+                    <button onclick="openTab(event, 'mat-teg', 'mat-tab-btn', 'mat-tab-content')" class="mat-tab-btn w-1/4 py-4 text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">TEG Semiconductors</button>
+                </div>
+
+                <div id="mat-orc" class="mat-tab-content active p-8">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm text-left">
+                            <thead class="bg-slate-50 text-slate-700 font-bold uppercase text-xs">
+                                <tr><th class="px-6 py-3">Material</th><th class="px-6 py-3">Main Advantage</th><th class="px-6 py-3">Application Condition</th><th class="px-6 py-3">Limitation</th></tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <tr><td class="px-6 py-4 font-semibold text-slate-900">Carbon Steel</td><td class="px-6 py-4">Cost-effective</td><td class="px-6 py-4">Shells & piping, non-corrosive fluids</td><td class="px-6 py-4 text-red-500">Not suitable for corrosive conditions</td></tr>
+                                <tr><td class="px-6 py-4 font-semibold text-slate-900">Stainless Steel (304, 316L)</td><td class="px-6 py-4">Excellent corrosion resistance</td><td class="px-6 py-4">Acidic fluid decomposition products</td><td class="px-6 py-4 text-slate-400">—</td></tr>
+                                <tr><td class="px-6 py-4 font-semibold text-slate-900">Copper Alloys</td><td class="px-6 py-4">High thermal conductivity</td><td class="px-6 py-4">Compact heat exchangers</td><td class="px-6 py-4 text-orange-500">Requires chemical compatibility check</td></tr>
+                                <tr><td class="px-6 py-4 font-semibold text-slate-900">Nickel Alloys / Titanium</td><td class="px-6 py-4">Superior strength & resistance</td><td class="px-6 py-4">Aggressive environments / High Temp</td><td class="px-6 py-4 text-orange-500">Significant cost premium</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="mat-kalina" class="mat-tab-content p-8">
+                    <h3 class="text-lg font-bold text-slate-900 mb-4">Ammonia Corrosion Management</h3>
+                    <p class="text-slate-600 mb-6">The primary challenge in Kalina systems is the corrosive nature of the ammonia-water working fluid, particularly towards copper-based alloys.</p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-red-50 p-4 rounded border border-red-100"><h4 class="font-bold text-red-800 mb-2">Avoid</h4><ul class="list-disc list-inside text-sm text-red-700"><li>Copper and Copper Alloys (rapidly corroded by ammonia)</li><li>Zinc and Brass fittings</li></ul></div>
+                        <div class="bg-green-50 p-4 rounded border border-green-100"><h4 class="font-bold text-green-800 mb-2">Required Materials</h4><ul class="list-disc list-inside text-sm text-green-700"><li><strong>Carbon Steel:</strong> Adequate for lower temperature/concentration components.</li><li><strong>Stainless Steel:</strong> Mandatory for high temp/pressure zones.</li></ul></div>
+                    </div>
+                </div>
+
+                <div id="mat-abs" class="mat-tab-content p-8">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div><h4 class="font-bold text-slate-900 mb-3 text-lg">Lithium Bromide (LiBr)</h4><p class="text-sm text-slate-600 mb-4">Highly corrosive to carbon steel in the presence of oxygen.</p><div class="bg-slate-50 p-4 rounded border border-slate-200 text-sm"><span class="font-bold block mb-2 text-slate-700">Management Strategy:</span><ul class="list-disc list-inside space-y-1 text-slate-600"><li>Operate under deep vacuum to exclude oxygen.</li><li><strong>Inhibitors:</strong> Lithium nitrate, lithium molybdate.</li><li>Promote stable magnetite (Fe3O4) protective layer.</li></ul></div></div>
+                        <div><h4 class="font-bold text-slate-900 mb-3 text-lg">Ammonia-Water</h4><p class="text-sm text-slate-600 mb-4">Corrosion of steel generates hydrogen gas, which degrades vacuum performance.</p><div class="bg-slate-50 p-4 rounded border border-slate-200 text-sm"><span class="font-bold block mb-2 text-slate-700">Management Strategy:</span><ul class="list-disc list-inside space-y-1 text-slate-600"><li>Use soluble silicon compounds (sodium silicate) as inhibitors.</li><li>Regular chemical analysis to maintain inhibitor concentration.</li></ul></div></div>
+                    </div>
+                </div>
+
+                <div id="mat-teg" class="mat-tab-content p-8">
+                    <h3 class="text-lg font-bold text-slate-900 mb-4">Semiconductor Selection by Temperature</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center p-4 border border-slate-200 rounded-lg"><div class="w-24 font-bold text-blue-600 text-center border-r border-slate-200 pr-4">&lt;250°C<span class="block text-xs font-normal text-slate-400">Low Temp</span></div><div class="pl-4"><h4 class="font-bold text-slate-800">Bismuth Telluride (Bi₂Te₃)</h4><p class="text-xs text-slate-500 mt-1">Standard for waste heat recovery. Highest ZT values near room temp.</p></div></div>
+                        <div class="flex items-center p-4 border border-slate-200 rounded-lg bg-orange-50 border-orange-100"><div class="w-24 font-bold text-orange-600 text-center border-r border-orange-200 pr-4">250-600°C<span class="block text-xs font-normal text-orange-400">Mid Temp</span></div><div class="pl-4"><h4 class="font-bold text-slate-800">Lead Telluride (PbTe) / Skutterudites</h4><p class="text-xs text-slate-500 mt-1">Superior stability for engine exhaust applications.</p></div></div>
+                        <div class="flex items-center p-4 border border-slate-200 rounded-lg"><div class="w-24 font-bold text-red-600 text-center border-r border-slate-200 pr-4">&gt;600°C<span class="block text-xs font-normal text-slate-400">High Temp</span></div><div class="pl-4"><h4 class="font-bold text-slate-800">Silicon-Germanium (SiGe)</h4><p class="text-xs text-slate-500 mt-1">Used for very high-temperature applications (e.g., space probes).</p></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW SECTION: Case Studies -->
+    <section id="case-studies" class="py-16 bg-slate-50 border-t border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-10 text-center">
+                <h2 class="text-3xl font-bold text-slate-900">Proven Deployments</h2>
+                <p class="mt-4 text-slate-600 max-w-2xl mx-auto">
+                    Real-world validation of waste heat recovery technologies in industrial settings.
+                </p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+                <div class="flex border-b border-slate-200 bg-slate-50">
+                    <button onclick="openTab(event, 'case-orc', 'case-tab-btn', 'case-tab-content')" class="case-tab-btn active w-1/5 py-4 text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">ORC Systems</button>
+                    <button onclick="openTab(event, 'case-abs', 'case-tab-btn', 'case-tab-content')" class="case-tab-btn w-1/5 py-4 text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">Absorption Chillers</button>
+                    <button onclick="openTab(event, 'case-teg', 'case-tab-btn', 'case-tab-content')" class="case-tab-btn w-1/5 py-4 text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">TEG Systems</button>
+                    <button onclick="openTab(event, 'case-emerging', 'case-tab-btn', 'case-tab-content')" class="case-tab-btn w-1/5 py-4 text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">Emerging Tech</button>
+                    <button onclick="openTab(event, 'case-solar', 'case-tab-btn', 'case-tab-content')" class="case-tab-btn w-1/5 py-4 text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">Solar Steam EOR</button>
+                </div>
+
+                <div id="case-orc" class="case-tab-content active p-8">
+                    <div class="grid gap-6">
+                        <!-- Case Study 1 -->
+                        <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-xl font-bold text-slate-900">ElectraTherm Power+ at Remote Generator</h3>
+                                    <p class="text-sm text-slate-500">Micronesia Island Utility | Commissioned 2015</p>
+                                </div>
+                                <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">TRL 9</span>
+                            </div>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 class="font-semibold text-sm text-slate-700 mb-2">Technical Specs</h4>
+                                    <ul class="text-sm text-slate-600 space-y-1">
+                                        <li><strong>Heat Source:</strong> Diesel Jacket Water (90°C)</li>
+                                        <li><strong>Output:</strong> 50-65 kWe</li>
+                                        <li><strong>Fuel Savings:</strong> 7-10% reduction</li>
+                                        <li><strong>Payback:</strong> 4-6 years</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-sm text-slate-700 mb-2">O&G Relevance</h4>
+                                    <p class="text-sm text-slate-600">Direct parallel to upstream well pads. Modular design installs in <2 weeks. Simplified O&M suits remote locations.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Case Study 2: Turboden ORC -->
+                        <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-xl font-bold text-slate-900">Turboden ORC at Italian Steel Plant</h3>
+                                    <p class="text-sm text-slate-500">Arvedi Steel Mill, Italy | Commissioned 2013</p>
+                                </div>
+                                <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">TRL 9</span>
+                            </div>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 class="font-semibold text-sm text-slate-700 mb-2">Technical Specs</h4>
+                                    <ul class="text-sm text-slate-600 space-y-1">
+                                        <li><strong>Heat Source:</strong> Exhaust Gas (470-520°C)</li>
+                                        <li><strong>Output:</strong> 13 MW</li>
+                                        <li><strong>Efficiency:</strong> ~20% thermal-to-electric</li>
+                                        <li><strong>Availability:</strong> >95% over 8+ years</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-sm text-slate-700 mb-2">O&G Relevance</h4>
+                                    <p class="text-sm text-slate-600">Similar high-temperature exhaust conditions exist at large midstream compressor stations with gas turbines running >6,000 hours/year.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="case-abs" class="case-tab-content p-8">
+                    <div class="grid gap-6">
+                        <!-- Case Study 3 -->
+                        <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-xl font-bold text-slate-900">Triple-Effect Absorption Chiller</h3>
+                                    <p class="text-sm text-slate-500">Texas Gas Processing Plant | Commissioned 2018</p>
+                                </div>
+                                <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">TRL 9</span>
+                            </div>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 class="font-semibold text-sm text-slate-700 mb-2">Performance</h4>
+                                    <ul class="text-sm text-slate-600 space-y-1">
+                                        <li><strong>Power Gain:</strong> +15% (6 MW) on hot days</li>
+                                        <li><strong>Revenue:</strong> +$2.4M/year</li>
+                                        <li><strong>Payback:</strong> 1.2 years</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-sm text-slate-700 mb-2">Key Lesson</h4>
+                                    <p class="text-sm text-slate-600">Economic case driven by capacity increase, not just energy savings. Critical for midstream operators in hot climates.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Case Study 4: Single-Effect Absorption -->
+                        <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-xl font-bold text-slate-900">Single-Effect Absorption Chiller (HVAC)</h3>
+                                    <p class="text-sm text-slate-500">Manufacturing Facility, SE USA | Commissioned 2020</p>
+                                </div>
+                                <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">TRL 9</span>
+                            </div>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 class="font-semibold text-sm text-slate-700 mb-2">Performance</h4>
+                                    <ul class="text-sm text-slate-600 space-y-1">
+                                        <li><strong>Heat Source:</strong> Steam (120°C)</li>
+                                        <li><strong>Cooling:</strong> 1.76 MW (500 RT)</li>
+                                        <li><strong>Savings:</strong> $180k/year avoided electricity</li>
+                                        <li><strong>Payback:</strong> 2.9 years</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-sm text-slate-700 mb-2">O&G Relevance</h4>
+                                    <p class="text-sm text-slate-600">Gas processing plants with continuous cooling requirements could use lower-temperature waste heat to provide facility HVAC.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="case-teg" class="case-tab-content p-8">
+                    <div class="grid gap-6">
+                        <!-- Case Study 5 -->
+                        <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-xl font-bold text-slate-900">TEG-Powered Pipeline Monitoring</h3>
+                                    <p class="text-sm text-slate-500">TransCanada Pipeline | Deployed 2014</p>
+                                </div>
+                                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">TRL 9</span>
+                            </div>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 class="font-semibold text-sm text-slate-700 mb-2">Outcomes</h4>
+                                    <ul class="text-sm text-slate-600 space-y-1">
+                                        <li><strong>Uptime:</strong> 99.5%+ over 8 years</li>
+                                        <li><strong>Maintenance:</strong> Zero site visits for power</li>
+                                        <li><strong>Savings:</strong> Eliminated $150k/yr battery costs</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-sm text-slate-700 mb-2">Application</h4>
+                                    <p class="text-sm text-slate-600">Ideal for remote valve stations requiring 24/7 SCADA. Maintenance-free operation justifies higher initial capital cost.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Case Study 7: AEInnova -->
+                        <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-xl font-bold text-slate-900">AEInnova Thermoelectric Sensors</h3>
+                                    <p class="text-sm text-slate-500">REPSOL Refinery, Spain | Deployed 2022</p>
+                                </div>
+                                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">TRL 8</span>
+                            </div>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 class="font-semibold text-sm text-slate-700 mb-2">Performance</h4>
+                                    <ul class="text-sm text-slate-600 space-y-1">
+                                        <li><strong>Power:</strong> 15-30W per sensor node</li>
+                                        <li><strong>Certification:</strong> ATEX/IECEx Zone 1</li>
+                                        <li><strong>Benefit:</strong> Zero battery replacements</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-sm text-slate-700 mb-2">O&G Relevance</h4>
+                                    <p class="text-sm text-slate-600">Enables truly wireless sensors in hazardous locations. Applicable to compressor stations and wellhead monitoring.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="case-emerging" class="case-tab-content p-8">
+                    <!-- Case Study 6 -->
+                    <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-900">Orcan Energy ORC Module</h3>
+                                <p class="text-sm text-slate-500">Chevron San Ardo Field, CA | Commissioned 2019</p>
+                            </div>
+                            <span class="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded">TRL 8</span>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-semibold text-sm text-slate-700 mb-2">Results</h4>
+                                <ul class="text-sm text-slate-600 space-y-1">
+                                    <li><strong>Output:</strong> 110-125 kWe continuous</li>
+                                    <li><strong>Offset:</strong> 18% of field load</li>
+                                    <li><strong>Payback:</strong> 5-6 years (w/ incentives)</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-sm text-slate-700 mb-2">Significance</h4>
+                                <p class="text-sm text-slate-600">First commercial deployment on active US oil production site. Modular design minimized field disruption.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NEW TAB: Solar Steam EOR -->
+                <div id="case-solar" class="case-tab-content p-8">
+                    <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-900">Solar Steam Generation for EOR</h3>
+                                <p class="text-sm text-slate-500">Amal West Field, Oman (GlassPoint) | Commissioned 2012 (Pilot), 2015 (Miraah announced)</p>
+                            </div>
+                            <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">TRL 9</span>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-semibold text-sm text-slate-700 mb-2">The Hybrid Model</h4>
+                                <p class="text-sm text-slate-600 leading-relaxed mb-4">
+                                    Combines solar thermal steam generation with traditional fuel-based methods (Boiler or Cogeneration). Solar provides low-cost steam during daylight hours, while fuel-based systems provide baseload and night-time capacity.
+                                </p>
+                                <ul class="text-sm text-slate-600 space-y-1">
+                                    <li><strong>Solar Cost:</strong> ~$17/ton steam</li>
+                                    <li><strong>Gas Boiler Cost:</strong> ~$27/ton (at $6/MMBtu gas)</li>
+                                    <li><strong>Fuel Break-Even:</strong> Solar beats gas when fuel >$4.50/MMBtu</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-sm text-slate-700 mb-2">Strategic Relevance for Devon</h4>
+                                <p class="text-sm text-slate-600 leading-relaxed">
+                                    This model directly addresses thermal EOR needs in gas-constrained environments. It allows operators to divert valuable natural gas to higher-margin sales (e.g., LNG export) while maintaining reservoir pressure.
+                                </p>
+                                <div class="bg-blue-50 p-3 rounded mt-3 text-xs text-blue-800">
+                                    <strong>Constraint:</strong> Solar fraction limited to ~80% without storage due to need for continuous night-time injection to maintain well integrity.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW SECTION: Startup Spotlight -->
+    <section id="startup-spotlight" class="py-16 bg-white border-t border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-10 text-center">
+                <h2 class="text-3xl font-bold text-slate-900">Startup Spotlight</h2>
+                <p class="mt-4 text-slate-600 max-w-2xl mx-auto">
+                    Innovative companies driving the next generation of waste heat recovery technology.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Climeon Spotlight -->
+                <div class="bg-slate-50 rounded-xl p-8 border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-2xl font-bold text-slate-900">Climeon</h3>
+                        <span class="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-semibold">ORC Systems</span>
+                    </div>
+                    
+                    <div class="mb-6 h-48 bg-white rounded-lg border border-slate-200 flex items-center justify-center overflow-hidden relative">
+                        <img src="https://www.climeon.com/wp-content/uploads/2023/11/Climeon-HeatPower-300-Product-Image.png" alt="Climeon HeatPower 300 ORC system" class="max-h-full object-contain">
+                    </div>
+
+                    <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wide mb-3">Technical Overview</h4>
+                    <p class="text-sm text-slate-600 mb-4 leading-relaxed">
+                        Climeon specializes in low-temperature waste heat recovery using a proprietary Organic Rankine Cycle (ORC) technology called <strong>HeatPower</strong>. Their systems are designed to operate efficiently at temperatures as low as 70°C up to 120°C, a range often considered unviable for traditional power generation.
+                    </p>
+                    <ul class="text-sm text-slate-600 space-y-2 mb-6">
+                        <li class="flex items-start"><span class="text-blue-500 mr-2">•</span><strong>Tech:</strong> Low-pressure, modular ORC units.</li>
+                        <li class="flex items-start"><span class="text-blue-500 mr-2">•</span><strong>Focus:</strong> Maritime & Industrial waste heat.</li>
+                        <li class="flex items-start"><span class="text-blue-500 mr-2">•</span><strong>Efficiency:</strong> Optimized for low-temp delta.</li>
+                    </ul>
+                    <a href="https://climeon.com/" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm font-medium inline-flex items-center">
+                        Visit Website <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                </div>
+
+                <!-- Lava Power Spotlight -->
+                <div class="bg-slate-50 rounded-xl p-8 border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-2xl font-bold text-slate-900">Lava Power</h3>
+                        <span class="bg-orange-100 text-orange-800 text-xs px-3 py-1 rounded-full font-semibold">Heat Pumps</span>
+                    </div>
+                    
+                    <div class="mb-6 h-48 bg-white rounded-lg border border-slate-200 flex items-center justify-center overflow-hidden relative">
+                        <div class="text-slate-400 text-center">
+                            
+                        </div>
+                    </div>
+
+                    <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wide mb-3">Technical Overview</h4>
+                    <p class="text-sm text-slate-600 mb-4 leading-relaxed">
+                        Lava Power focuses on high-temperature industrial heat pumps that can upgrade low-grade waste heat to useful process heat. Their technology enables the decarbonization of industrial processes by recycling thermal energy that would otherwise be lost, effectively closing the loop on industrial heat consumption.
+                    </p>
+                    <ul class="text-sm text-slate-600 space-y-2 mb-6">
+                        <li class="flex items-start"><span class="text-orange-500 mr-2">•</span><strong>Tech:</strong> High-temperature lift heat pumps.</li>
+                        <li class="flex items-start"><span class="text-orange-500 mr-2">•</span><strong>Focus:</strong> Industrial process heat recovery.</li>
+                        <li class="flex items-start"><span class="text-orange-500 mr-2">•</span><strong>Output:</strong> Steam/Hot water for process use.</li>
+                    </ul>
+                    <a href="https://lavapower.com/" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm font-medium inline-flex items-center">
+                        Visit Website <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Project Screening Calculator (Merged) -->
+    <section id="calculator" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-2 gap-12">
+                <!-- Input Panel -->
+                <div class="bg-slate-50 p-6 rounded-xl shadow-sm border border-slate-200 space-y-6">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-4">Project Screening Calculator</h2>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Heat Source Temperature (°C)</label>
+                        <input type="range" id="tempInput" min="50" max="200" value="90" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                        <div class="flex justify-between text-xs text-slate-500 mt-1">
+                            <span>50°C</span>
+                            <span id="tempValue" class="font-bold text-blue-600 text-base">90°C</span>
+                            <span>200°C</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Annual Operation (Hours)</label>
+                        <input type="range" id="hoursInput" min="1000" max="8760" value="6500" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                        <div class="flex justify-between text-xs text-slate-500 mt-1">
+                            <span>1,000 hrs</span>
+                            <span id="hoursValue" class="font-bold text-blue-600 text-base">6,500 hrs</span>
+                            <span>8,760 hrs</span>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Target Electrical Output (kW)</label>
+                        <input type="range" id="capacityInput" min="10" max="5000" step="10" value="500" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                        <div class="flex justify-between text-xs text-slate-500 mt-1">
+                            <span>10 kW</span>
+                            <span id="capacityValue" class="font-bold text-blue-600 text-base">500 kW</span>
+                            <span>5,000 kW</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Output Panel -->
+                <div class="flex flex-col justify-center space-y-6">
+                    <!-- Financial Results Card -->
+                    <div class="bg-slate-900 text-white p-8 rounded-xl shadow-lg relative overflow-hidden">
+                        <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-blue-500 rounded-full opacity-20 blur-3xl"></div>
+                        
+                        <h3 class="text-xl font-semibold mb-6 border-b border-slate-700 pb-4">Financial Assessment</h3>
+                        
+                        <div class="mb-6">
+                            <div>
+                                <span class="block text-slate-400 text-xs uppercase tracking-wider mb-1">Est. Project CapEx</span>
+                                <span id="capexValue" class="text-3xl font-bold text-white">$1.25M</span>
+                            </div>
+                        </div>
+                        
+                         <div class="flex items-center justify-between mb-2">
+                            <span class="text-slate-300 text-sm">Viability Status</span>
+                            <span id="econResult" class="px-3 py-1 rounded text-xs font-bold bg-green-500/20 text-green-400">VIABLE</span>
+                        </div>
+                        <p id="econComment" class="text-xs text-slate-400 italic">Duty cycle exceeds 6,000 hr threshold.</p>
+                    </div>
+                    
+                    <!-- Model Enhancement Suggestions -->
+                    <button onclick="document.getElementById('modelModal').classList.remove('hidden')" class="w-full py-2 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors border border-blue-200">
+                        View Model Enhancement Suggestions
+                    </button>
+                    
+                     <!-- Technical Feasibility Card -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">Technical Fit</h4>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-slate-700 font-medium">Tech Suitability</span>
+                            <span id="techResult" class="px-3 py-1 rounded text-xs font-bold bg-blue-100 text-blue-700">OPTIMAL</span>
+                        </div>
+                        <p id="techComment" class="text-sm text-slate-600">Temperature supports ORC and Absorption Chillers.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Model Enhancement Modal -->
+    <div id="modelModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 hidden backdrop-blur-sm p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-8 relative">
+            <button onclick="document.getElementById('modelModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 z-10">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h3 class="text-xl font-bold text-slate-900 mb-4">Future Techno-Economic Model Roadmap</h3>
+            <p class="text-sm text-slate-600 mb-6">To improve the accuracy of project screening, the following variables should be integrated into future iterations of this calculator:</p>
+            
+            <div class="space-y-4">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-6 w-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold mt-0.5">1</div>
+                    <div class="ml-4">
+                        <h4 class="text-sm font-bold text-slate-800">Net vs. Gross Carbon Accounting</h4>
+                        <p class="text-xs text-slate-600">Current models often use gross CO2 removal. Future models must account for upstream emissions (Scope 3) of the energy source used for capture (e.g., grid intensity vs. waste heat).</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs font-bold mt-0.5">2</div>
+                    <div class="ml-4">
+                        <h4 class="text-sm font-bold text-slate-800">Dynamic Marginal Pricing</h4>
+                        <p class="text-xs text-slate-600">Replace static fuel costs with dynamic curves that reflect the opportunity cost of fuel (e.g., LNG export parity prices) rather than subsidized domestic rates.</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-6 w-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-bold mt-0.5">3</div>
+                    <div class="ml-4">
+                        <h4 class="text-sm font-bold text-slate-800">Capacity Factor & Storage Integration</h4>
+                        <p class="text-xs text-slate-600">For solar/hybrid systems, explicitly model the cost impact of thermal storage hours required to meet the specific reservoir's night-time injection constraints.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW SECTION: Conclusion -->
+    <section id="conclusion" class="py-16 bg-slate-50 border-t border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-10">
+                <h2 class="text-3xl font-bold text-slate-900">Strategic Conclusion</h2>
+                <p class="mt-4 text-slate-600">
+                    A differentiated approach is required to unlock the full value of waste heat in Oil & Gas operations.
+                    There is no one-size-fits-all solution; success requires precision, financial strategy, and corporate alignment.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Midstream Strategy -->
+                <div class="bg-white rounded-xl p-8 border border-slate-200 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-blue-100 rounded-bl-full -mr-4 -mt-4 opacity-50"></div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-4 flex items-center">
+                        <span class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center mr-3 text-sm">1</span>
+                        Midstream Imperative
+                    </h3>
+                    <p class="text-sm text-slate-600 mb-4 leading-relaxed">
+                        Midstream operators should pursue <strong>large-scale, high-impact projects</strong> at centralized facilities. The combination of MW-scale ORC systems for baseload power generation and absorption chillers for turbine inlet cooling can transform compressor stations into dual revenue centers.
+                    </p>
+                    <ul class="text-sm text-slate-600 space-y-2">
+                        <li class="flex items-center"><svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Maximize economies of scale</li>
+                        <li class="flex items-center"><svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Leverage centralized infrastructure</li>
+                    </ul>
+                </div>
+
+                <!-- Upstream Strategy -->
+                <div class="bg-white rounded-xl p-8 border border-slate-200 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-green-100 rounded-bl-full -mr-4 -mt-4 opacity-50"></div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-4 flex items-center">
+                        <span class="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center mr-3 text-sm">2</span>
+                        Upstream Imperative
+                    </h3>
+                    <p class="text-sm text-slate-600 mb-4 leading-relaxed">
+                        Upstream operators must prioritize <strong>modularity, reliability, and learning value</strong>. Building capabilities now extends beyond immediate ROI to enable future opportunities like geothermal development. TEG deployments and modular ORC systems create immediate value while developing competency.
+                    </p>
+                    <ul class="text-sm text-slate-600 space-y-2">
+                        <li class="flex items-center"><svg class="w-4 h-4 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Focus on distributed assets</li>
+                        <li class="flex items-center"><svg class="w-4 h-4 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Build thermal competency</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Five Pillars of Success (Previously Critical Success Factors) -->
+            <div class="mt-8 bg-slate-800 rounded-xl p-8 text-white relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-r from-slate-800 to-slate-700 opacity-50"></div>
+                <div class="relative z-10">
+                    <h3 class="text-lg font-bold mb-6 border-b border-slate-600 pb-2 inline-block">Five Pillars of Success</h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 text-sm">
+                        <div>
+                            <h4 class="font-bold text-blue-400 mb-2">1. Technology Matching</h4>
+                            <p class="text-slate-300 leading-relaxed">Precise technology-to-application alignment based on specific heat source characteristics and operational constraints.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-blue-400 mb-2">2. Material Selection</h4>
+                            <p class="text-slate-300 leading-relaxed">Treating materials as a primary cost driver from the start, not an afterthought, to ensure longevity and performance.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-green-400 mb-2">3. Financial Engineering</h4>
+                            <p class="text-slate-300 leading-relaxed">Leveraging the full incentive stack (ITC, state programs, carbon credits) to meet internal hurdle rates.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-purple-400 mb-2">4. Strategic Alignment</h4>
+                            <p class="text-slate-300 leading-relaxed">Alignment with broader corporate goals like ESG targets and capacity building, beyond just efficiency.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-orange-400 mb-2">5. Commercial Pragmatism</h4>
+                            <p class="text-slate-300 leading-relaxed">Recognizing limited VC engagement by prioritizing established vendors or innovative financing structures.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Economic Analysis Charts -->
+    <section class="py-16 bg-slate-50 border-t border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-slate-900 mb-8 text-center">Financial Impact Analysis</h2>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl border border-slate-200">
+                    <h3 class="text-lg font-semibold text-slate-900 mb-4 text-center">Payback Period Scenarios</h3>
+                    <div class="chart-container">
+                        <canvas id="paybackChart"></canvas>
+                    </div>
+                    <p class="text-xs text-center text-slate-500 mt-4">Comparing simple payback with and without federal/state incentives.</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl border border-slate-200 flex flex-col justify-center">
+                   <h3 class="text-lg font-semibold text-slate-900 mb-6">Economic Drivers</h3>
+                   <ul class="space-y-4">
+                       <li class="flex items-start">
+                           <span class="text-blue-500 mr-3 text-xl">⚡</span>
+                           <div>
+                               <span class="font-bold text-slate-800">Electricity Price</span>
+                               <p class="text-sm text-slate-600">Viability increases significantly at >$0.08/kWh grid costs.</p>
+                           </div>
+                       </li>
+                       <li class="flex items-start">
+                           <span class="text-green-500 mr-3 text-xl">💰</span>
+                           <div>
+                               <span class="font-bold text-slate-800">Incentive Stack</span>
+                               <p class="text-sm text-slate-600">ITC (Investment Tax Credit) + DSIRE state incentives can reduce payback by 2-3 years.</p>
+                           </div>
+                       </li>
+                       <li class="flex items-start">
+                           <span class="text-purple-500 mr-3 text-xl">⚙️</span>
+                           <div>
+                               <span class="font-bold text-slate-800">Capacity Factor</span>
+                               <p class="text-sm text-slate-600">Must maintain >68% (6,000 hrs) uptime to amortize CapEx effectively.</p>
+                           </div>
+                       </li>
+                   </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vendor Ecosystem -->
+    <section class="py-16 bg-slate-900 text-slate-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-white">Vendor Ecosystem</h2>
+                <p class="mt-2 text-slate-400">Key partners identified in Appendix A</p>
+            </div>
+            
+            <div class="grid md:grid-cols-4 gap-6">
+                <div class="bg-slate-800 p-6 rounded-lg border border-slate-700 hover:border-blue-500 transition-colors">
+                    <h4 class="text-white font-bold mb-4 border-b border-slate-700 pb-2">ORC Systems</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="https://www.turboden.com" target="_blank" class="hover:text-blue-400 transition-colors">Turboden S.p.A.</a></li>
+                        <li><a href="https://www.ormat.com" target="_blank" class="hover:text-blue-400 transition-colors">Ormat Technologies</a></li>
+                        <li><a href="https://www.orcan-energy.com" target="_blank" class="hover:text-blue-400 transition-colors">Orcan Energy</a></li>
+                        <li><a href="https://electratherm.com" target="_blank" class="hover:text-blue-400 transition-colors">ElectraTherm (BITZER)</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Kanin Energy</a></li>
+                        <li><a href="https://climeon.com" target="_blank" class="hover:text-blue-400 transition-colors">Climeon</a></li>
+                    </ul>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-lg border border-slate-700 hover:border-green-500 transition-colors">
+                    <h4 class="text-white font-bold mb-4 border-b border-slate-700 pb-2">TEG Providers</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="https://www.aeinnova.com" target="_blank" class="hover:text-green-400 transition-colors">AEInnova</a></li>
+                        <li><a href="https://www.gptindustries.com" target="_blank" class="hover:text-green-400 transition-colors">Global Power Technologies</a></li>
+                        <li><a href="https://www.coherent.com" target="_blank" class="hover:text-green-400 transition-colors">Coherent Inc.</a></li>
+                    </ul>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-lg border border-slate-700 hover:border-purple-500 transition-colors">
+                    <h4 class="text-white font-bold mb-4 border-b border-slate-700 pb-2">Absorption Chillers</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="https://www.johnsoncontrols.com" target="_blank" class="hover:text-purple-400 transition-colors">Johnson Controls (YORK)</a></li>
+                        <li><a href="https://www.shuangliang.com" target="_blank" class="hover:text-purple-400 transition-colors">Shuangliang Eco-Energy</a></li>
+                        <li><a href="https://www.vamtec.com" target="_blank" class="hover:text-purple-400 transition-colors">Vamtec</a></li>
+                    </ul>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-lg border border-slate-700 hover:border-orange-500 transition-colors">
+                    <h4 class="text-white font-bold mb-4 border-b border-slate-700 pb-2">Heat Pumps & Storage</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="https://www.heaten.com" target="_blank" class="hover:text-orange-400 transition-colors">Heaten AS</a></li>
+                        <li><a href="https://www.ecop.at" target="_blank" class="hover:text-orange-400 transition-colors">ecop Technologies</a></li>
+                        <li><a href="https://www.kraftblock.com" target="_blank" class="hover:text-orange-400 transition-colors">Kraftblock (Storage)</a></li>
+                        <li><a href="https://lavapower.com" target="_blank" class="hover:text-orange-400 transition-colors">Lava Power</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-white border-t border-slate-200 py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-slate-500 text-sm">Based on "Low-Enthalpy Waste Heat Recovery for Oil & Gas Operations" - Oct 2025.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- 1. Charts Implementation ---
+        const ctxWaste = document.getElementById('wasteChart').getContext('2d');
+        const wasteChart = new Chart(ctxWaste, {
+            type: 'doughnut',
+            data: {
+                labels: ['Energy Utilized', 'Waste Heat (Lost)'],
+                datasets: [{
+                    data: [60, 40],
+                    backgroundColor: ['#e2e8f0', '#ef4444'],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { usePointStyle: true, font: {family: 'Inter'} } },
+                    tooltip: { callbacks: { label: (c) => c.label + ': ' + c.raw + '%' } }
+                },
+                cutout: '70%'
+            }
+        });
+
+        const ctxMatrix = document.getElementById('techMatrixChart').getContext('2d');
+        const techMatrixChart = new Chart(ctxMatrix, {
+            type: 'bubble',
+            data: {
+                datasets: [
+                    { label: 'ORC', data: [{x: 4, y: 18, r: 15}], backgroundColor: 'rgba(37, 99, 235, 0.7)', borderColor: '#2563eb' },
+                    { label: 'Kalina', data: [{x: 8, y: 22, r: 12}], backgroundColor: 'rgba(249, 115, 22, 0.7)', borderColor: '#f97316' },
+                    { label: 'TEG', data: [{x: 2, y: 6, r: 10}], backgroundColor: 'rgba(22, 163, 74, 0.7)', borderColor: '#16a34a' },
+                    { label: 'Abs. Chillers', data: [{x: 5, y: 12, r: 13}], backgroundColor: 'rgba(147, 51, 234, 0.7)', borderColor: '#9333ea' }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { title: { display: true, text: 'Implementation Complexity (Low → High)' }, min: 0, max: 10 },
+                    y: { title: { display: true, text: 'Theoretical Efficiency (%)' }, min: 0, max: 30 }
+                },
+                plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: (c) => c.dataset.label + ': Eff ' + c.raw.y + '%, Complexity ' + c.raw.x } } }
+            }
+        });
+
+        const ctxPayback = document.getElementById('paybackChart').getContext('2d');
+        const paybackChart = new Chart(ctxPayback, {
+            type: 'bar',
+            data: {
+                labels: ['Standard Scenario', 'With Incentives'],
+                datasets: [{
+                    label: 'Years to Payback',
+                    data: [6.8, 4.2],
+                    backgroundColor: ['#94a3b8', '#16a34a'],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, title: { display: true, text: 'Years' } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // --- 2. Interactive Strategy Logic ---
+        const strategies = {
+            midstream: {
+                sector: "Midstream Sector (Williams, OneOK)",
+                title: "Compressor Station Optimization",
+                desc: "Deploy 1-10 MW Organic Rankine Cycle (ORC) systems at gas turbine compressor stations. This captures high-volume exhaust heat to generate baseload electricity.",
+                tactic1: { title: "Primary: Power Gen", desc: "1-10 MW ORC Systems at compressor stations." },
+                tactic2: { title: "Secondary: Efficiency", desc: "Absorption Chillers for turbine inlet cooling to boost throughput." },
+                flow: ["Gas Turbine", "ORC System", "Clean Power"]
+            },
+            upstream: {
+                sector: "Upstream Sector (Devon Energy)",
+                title: "Distributed Remote Power",
+                desc: "Focus on modular <500 kW ORC systems for multi-well pads and TEGs for remote monitoring equipment. Reduces reliance on diesel generators.",
+                tactic1: { title: "Primary: Well Pads", desc: "Modular <500 kW ORC units replacing diesel gensets." },
+                tactic2: { title: "Secondary: Monitoring", desc: "TEGs for ultra-reliable power at remote data nodes." },
+                flow: ["Wellhead/Flare", "Modular ORC", "Site Power"]
+            }
+        };
+
+        function switchStrategy(type) {
+            const data = strategies[type];
+            document.getElementById('btn-midstream').className = type === 'midstream' 
+                ? "px-6 py-2 rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow-sm"
+                : "ml-1 px-6 py-2 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors";
+            
+            document.getElementById('btn-upstream').className = type === 'upstream'
+                ? "px-6 py-2 rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow-sm"
+                : "ml-1 px-6 py-2 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors";
+
+            document.getElementById('strategy-sector').textContent = data.sector;
+            document.getElementById('strategy-title').textContent = data.title;
+            document.getElementById('strategy-desc').textContent = data.desc;
+            document.getElementById('tactic-1-title').textContent = data.tactic1.title;
+            document.getElementById('tactic-1-desc').textContent = data.tactic1.desc;
+            document.getElementById('tactic-2-title').textContent = data.tactic2.title;
+            document.getElementById('tactic-2-desc').textContent = data.tactic2.desc;
+            document.getElementById('flow-1').textContent = type === 'midstream' ? "Gas Turbine" : "Wellhead/Flare";
+            document.getElementById('flow-2').textContent = type === 'midstream' ? "ORC System" : "Modular ORC";
+            document.getElementById('flow-3').textContent = type === 'midstream' ? "Clean Power" : "Site Power";
+        }
+
+        // --- 3. Technology Modal Logic ---
+        const techData = {
+            orc: {
+                title: "Organic Rankine Cycle (ORC)",
+                desc: "The ORC is the industry workhorse for low-enthalpy heat. It functions like a steam engine but uses organic fluids (like pentane or refrigerants) with lower boiling points than water. This allows it to generate pressure and drive a turbine at much lower temperatures (down to 80°C).",
+                tags: [
+                    {text: "Mature (TRL 9)", color: "bg-blue-100 text-blue-800"},
+                    {text: "Power Generation", color: "bg-slate-100 text-slate-700"}
+                ],
+                stats: [
+                    "Efficiency: 10-25%",
+                    "Temp Range: 80-350°C",
+                    "Capacity: 10kW - 40MW",
+                    "Cost: $2,000-3,000/kW"
+                ],
+                app: "Gas turbine exhaust at compressor stations; jacket water from reciprocating engines.",
+                // HTML for the Diagram
+                diagram: `
+                    <div class="cycle-container grid-cols-2">
+                        <div class="col-span-2 cycle-box heat-source">Heat Source (Exhaust)</div>
+                        <div class="col-span-2 connector-down h-8"></div>
+                        <div class="cycle-box">Evaporator<br><span class='text-xs font-normal'>Organic fluid boils</span></div>
+                        <div class="cycle-box work">Turbine<br><span class='text-xs font-normal'>Generates Work</span></div>
+                        <div class="connector-down h-8"></div>
+                        <div class="connector-down h-8"></div>
+                        <div class="cycle-box">Pump<br><span class='text-xs font-normal'>Pressurizes Fluid</span></div>
+                        <div class="cycle-box">Condenser<br><span class='text-xs font-normal'>Fluid cools</span></div>
+                        <div class="col-span-2 connector-down h-8"></div>
+                        <div class="col-span-2 cycle-box heat-sink">Cooling Water / Air</div>
+                    </div>`
+            },
+            kalina: {
+                title: "Kalina Cycle",
+                desc: "The Kalina cycle improves upon ORC by using a mixture of water and ammonia as the working fluid. By varying the concentration of the mixture, the boiling point changes during the process (temperature glide). This matches the temperature profile of the heat source more closely, improving efficiency.",
+                tags: [
+                    {text: "High Efficiency", color: "bg-orange-100 text-orange-800"},
+                    {text: "Complex", color: "bg-slate-100 text-slate-700"}
+                ],
+                stats: [
+                    "Efficiency: 12-30% (Higher than ORC)",
+                    "Temp Range: 100-400°C",
+                    "Complexity: High (Corrosive fluid)",
+                    "Cost: $2,500-4,000/kW"
+                ],
+                app: "Specialized midstream applications where maximizing efficiency justifies higher complexity.",
+                diagram: `
+                    <div class="cycle-container grid-cols-2">
+                        <div class="col-span-2 cycle-box heat-source">Heat Source</div>
+                        <div class="col-span-2 connector-down h-4"></div>
+                        <div class="cycle-box">Heat Exchanger<br><span class='text-xs font-normal'>Ammonia Mix</span></div>
+                        <div class="cycle-box work">Turbine<br><span class='text-xs font-normal'>Power</span></div>
+                        
+                        <div class="col-span-2 text-center text-xs text-slate-400 my-1">↓ Separator ↓</div>
+                        
+                        <div class="cycle-box">Absorber<br><span class='text-xs font-normal'>Recombines</span></div>
+                        <div class="cycle-box">Condenser<br><span class='text-xs font-normal'>Heat Out</span></div>
+                    </div>`
+            },
+            teg: {
+                title: "Thermoelectric Generator (TEG)",
+                desc: "TEGs rely on the Seebeck effect, where a temperature difference across two dissimilar semiconductors creates a voltage. They are solid-state devices with no moving parts, making them maintenance-free but currently expensive per watt.",
+                tags: [
+                    {text: "Solid State", color: "bg-green-100 text-green-800"},
+                    {text: "Maintenance Free", color: "bg-slate-100 text-slate-700"}
+                ],
+                stats: [
+                    "Efficiency: <8%",
+                    "Temp Range: Any (requires gradient)",
+                    "Reliability: Ultra-High",
+                    "Cost: High ($2k-15k/kW)"
+                ],
+                app: "Remote wellheads, SCADA systems, and monitoring nodes where grid power is unavailable.",
+                diagram: `
+                    <div class="cycle-container grid-cols-1">
+                        <div class="cycle-box heat-source w-full">Hot Side (Pipe Surface)</div>
+                        <div class="h-8 border-l-2 border-dashed border-slate-400"></div>
+                        <div class="cycle-box work w-full bg-slate-800 text-white border-slate-800">
+                            TEG Module<br>
+                            <span class='text-xs font-normal text-slate-300'>P-Type | N-Type Semiconductors</span>
+                        </div>
+                        <div class="h-8 border-l-2 border-dashed border-slate-400"></div>
+                        <div class="cycle-box heat-sink w-full">Cold Side (Heat Sink/Air)</div>
+                        <div class="absolute right-10 top-1/2 text-xs font-bold text-green-600">→ DC Current →</div>
+                    </div>`
+            },
+            abs: {
+                title: "Absorption Chillers",
+                desc: "Instead of using mechanical compression (like a home AC), absorption chillers use heat energy (thermal compression) to drive the cooling cycle. Common pairs are Lithium Bromide/Water or Ammonia/Water.",
+                tags: [
+                    {text: "Cooling", color: "bg-purple-100 text-purple-800"},
+                    {text: "Turbine Efficiency", color: "bg-slate-100 text-slate-700"}
+                ],
+                stats: [
+                    "COP: 0.7 - 1.4",
+                    "Heat Source: >90°C",
+                    "Output: Chilled Water (4-7°C)",
+                    "Cost: $900-2,100/RT"
+                ],
+                app: "Turbine Inlet Cooling (TIC) to boost midstream compressor performance in hot summers.",
+                diagram: `
+                    <div class="cycle-container grid-cols-2 gap-4">
+                        <div class="cycle-box heat-source">Generator<br><span class='text-xs font-normal'>Heat Input</span></div>
+                        <div class="cycle-box heat-sink">Condenser<br><span class='text-xs font-normal'>Heat Rejection</span></div>
+                        
+                        <div class="col-span-2 flex justify-center text-xs text-slate-400">↓ Refrigerant Loop ↓</div>
+                        
+                        <div class="cycle-box">Absorber<br><span class='text-xs font-normal'>Mixes Fluid</span></div>
+                        <div class="cycle-box work border-blue-400 text-blue-600 bg-blue-50">Evaporator<br><span class='text-xs font-normal'>Produces Cold</span></div>
+                    </div>`
+            }
+        };
+
+        function openModal(tech) {
+            const data = techData[tech];
+            document.getElementById('modal-title').textContent = data.title;
+            document.getElementById('modal-desc').textContent = data.desc;
+            document.getElementById('modal-app').textContent = data.app;
+            document.getElementById('modal-diagram').innerHTML = data.diagram;
+            
+            const statsList = document.getElementById('modal-stats');
+            statsList.innerHTML = '';
+            data.stats.forEach(stat => {
+                const li = document.createElement('li');
+                li.className = "flex items-center text-slate-600";
+                li.innerHTML = `<span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></span>${stat}`;
+                statsList.appendChild(li);
+            });
+
+            const tagsDiv = document.getElementById('modal-tags');
+            tagsDiv.innerHTML = '';
+            data.tags.forEach(tag => {
+                const span = document.createElement('span');
+                span.className = `text-xs px-2 py-1 rounded font-semibold ${tag.color}`;
+                span.textContent = tag.text;
+                tagsDiv.appendChild(span);
+            });
+
+            document.getElementById('techModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('techModal').classList.add('hidden');
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('techModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // --- 4. Tab Logic ---
+        function openTab(evt, tabName, btnClass, contentClass) {
+            var i, tabcontent, tablinks;
+            
+            // Hide all contents for this tab group
+            tabcontent = document.getElementsByClassName(contentClass);
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+
+            // Remove active class from all buttons for this tab group
+            tablinks = document.getElementsByClassName(btnClass);
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+
+            // Show current tab and set button active
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+        
+        function openMaterialTab(evt, tabName) {
+            openTab(evt, tabName, 'mat-tab-btn', 'mat-tab-content');
+        }
+        
+        // --- 5. Tech Tab Logic ---
+        function openTechTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            
+            // Hide all tab contents
+            tabcontent = document.getElementsByClassName("tech-tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+
+            // Remove active class from all buttons
+            tablinks = document.getElementsByClassName("tech-tab-btn");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+
+            // Show current tab and set button active
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        // --- 6. Calculator Logic (Simplified) ---
+        const tempInput = document.getElementById('tempInput');
+        const hoursInput = document.getElementById('hoursInput');
+        // const costInput = document.getElementById('costInput'); // REMOVED
+        const capacityInput = document.getElementById('capacityInput');
+        // const incentiveToggle = document.getElementById('incentiveToggle'); // REMOVED
+
+        function updateCalculator() {
+            const temp = parseInt(tempInput.value);
+            const hours = parseInt(hoursInput.value);
+            const capacity = parseInt(capacityInput.value); // kW
+
+            // Update Display Labels
+            document.getElementById('tempValue').textContent = temp + "°C";
+            document.getElementById('hoursValue').textContent = hours.toLocaleString() + " hrs";
+            document.getElementById('capacityValue').textContent = capacity.toLocaleString() + " kW";
+
+            // --- Logic from Report ---
+            
+            // 1. Technical Viability (Temperature)
+            let techFeasible = false;
+            let techMsg = "";
+            if (temp >= 90) {
+                techFeasible = true;
+                techMsg = "Optimal. Supports ORC & Absorption Chillers.";
+            } else if (temp >= 85) {
+                techFeasible = true;
+                techMsg = "Viable for ORC. Borderline for Absorption.";
+            } else if (temp >= 50) {
+                techFeasible = true; 
+                techMsg = "Low temp. Limited to TEGs or specific Heat Pumps.";
+            } else {
+                techFeasible = false;
+                techMsg = "Temperature too low for economic recovery.";
+            }
+
+            // 2. Economic Feasibility (Duty Cycle + Scale)
+            let econFeasible = false;
+            let econMsg = "";
+            let scaleType = "";
+
+            if (capacity >= 500) {
+                scaleType = "Midstream Scale";
+                if (hours >= 6000) {
+                    econFeasible = true;
+                    econMsg = "High viability (Midstream scale + High uptime).";
+                } else {
+                    econFeasible = false;
+                    econMsg = "Scale good, but duty cycle <6000hrs hurts ROI.";
+                }
+            } else if (capacity >= 50) {
+                scaleType = "Upstream Scale";
+                if (hours >= 6000) {
+                    econFeasible = true;
+                    econMsg = "Viable for distributed Upstream assets.";
+                } else {
+                    econFeasible = false;
+                    econMsg = "Low uptime challenges small-scale economics.";
+                }
+            } else {
+                scaleType = "Micro Scale";
+                econFeasible = false;
+                econMsg = "Below 50kW threshold. Niche applications only (TEG).";
+            }
+
+            // 3. Financials (CapEx Only)
+            // Estimating CapEx $/kW based on scale (Economies of scale)
+            // Base: $2500/kW (ORC avg). Small systems cost more per kW.
+            let costPerKW = 2500; 
+            if (capacity < 100) costPerKW = 3500;
+            else if (capacity > 1000) costPerKW = 2000;
+
+            const totalCapEx = capacity * costPerKW;
+
+            // Update UI Elements
+            const techResEl = document.getElementById('techResult');
+            if (techResEl) {
+                techResEl.textContent = techFeasible ? "FEASIBLE" : "CHALLENGING";
+                techResEl.className = techFeasible 
+                    ? "px-3 py-1 rounded text-xs font-bold bg-blue-100 text-blue-700" 
+                    : "px-3 py-1 rounded text-xs font-bold bg-red-100 text-red-700";
+            }
+            const techCommentEl = document.getElementById('techComment');
+            if (techCommentEl) {
+                techCommentEl.textContent = techMsg;
+            }
+
+            const econResEl = document.getElementById('econResult');
+            if (econResEl) {
+                econResEl.textContent = econFeasible ? "VIABLE" : "RISKY";
+                econResEl.className = econFeasible 
+                    ? "px-3 py-1 rounded text-xs font-bold bg-green-500/20 text-green-400" 
+                    : "px-3 py-1 rounded text-xs font-bold bg-yellow-500/20 text-yellow-400";
+            }
+            const econCommentEl = document.getElementById('econComment');
+            if (econCommentEl) {
+                econCommentEl.textContent = econMsg + " (" + scaleType + ")";
+            }
+
+            // Format CapEx
+            const capexStr = (totalCapEx / 1000000).toFixed(2) + "M";
+            document.getElementById('capexValue').textContent = "$" + capexStr;
+        }
+
+        // Listeners
+        tempInput.addEventListener('input', updateCalculator);
+        hoursInput.addEventListener('input', updateCalculator);
+        capacityInput.addEventListener('input', updateCalculator);
+        
+        // Init
+        updateCalculator();
+        
+        // --- 5a. Startup Tab Logic ---
+        function openStartupTab(evt, tabName) {
+            openTab(evt, tabName, "startup-tab-btn", "startup-tab-content");
+        }
+
+    </script>
+</body>
+</html>
